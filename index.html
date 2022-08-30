@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>HUMANISE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <style>
+    body {
+      background-color: #fafafa;
+    }
+    hr {
+      background-color: #f1f1f1;
+    }
+    .table td, .table th {
+      padding-bottom: 0.2em;
+    }
+    .content-block {
+      padding: 0 6px;
+    }
+    .title {
+      font-size: 32px;
+      padding-top: 32px;
+    }
+    .sub-title {
+      font-size: 26px;
+      padding-bottom: 16px;
+    }
+    .subsub-title {
+      font-size: 20px;
+      padding-bottom: 8px;
+    }
+    .author {
+      font-size: 16px;
+    }
+    .action {
+      padding-bottom: 12px;
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <div id="app">
+    <div class="columns">
+      <div class="column" :class="[content, offset]">
+
+        <h1 class="title has-text-centered">HUMANISE: Language-conditioned Human Motion Generation in 3D Scenes</h1>
+
+        <div class="has-text-centered" style="padding: 0 32px;">
+          <table style="margin-bottom: 16px; width: 100%;">
+            <tbody>
+              <tr>
+                <td><p class="author"><a href="https://silvester.wang">Zan Wang</a><sup>1,3</sup></p></td>
+                <td><p class="author"><a href="https://yixchen.github.io/">Yixin Chen</a><sup>3</sup></p></td>
+                <td><p class="author"><a href="http://tengyu.ai/">Tengyu Liu</a><sup>3</sup></p></td>
+                <td><p class="author"><a href="https://yzhu.io/">Yixin Zhu</a><sup>2</sup></p></td>
+                <td><p class="author"><a href="https://liangwei-bit.github.io/web/">Wei Liang</a><sup>1</sup></p></td>
+                <td><p class="author"><a href="https://siyuanhuang.com/">Siyuan Huang</a><sup>3</sup></p></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p style="font-size: 16px;">
+            <sup>1</sup>Beijing Institute of Technology &nbsp;&nbsp;&nbsp;
+            <sup>2</sup>Peking University <br>
+            <sup>3</sup>Beijing Institute for General Artificial Intelligence (BIGAI)
+          </p>
+
+          <div style="margin: 16px 0; font-size: 18px;">
+            <p> <a>Paper</a> &nbsp;|&nbsp; <a>arXiv</a> &nbsp;|&nbsp; <a>Code</a> &nbsp;|&nbsp; <a>Data</a> </p>
+          </div>
+
+          <figure class="image" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+            <img src="./figure/teaser.png">
+          </figure>
+        </div>
+
+        <hr>
+
+        <div class="has-text-centered content-block">
+          <h2 class="sub-title">Abstract</h2>
+          <p style="text-align:justify">
+            Learning to generate diverse scene-aware and goal-oriented human motions in
+            3D scenes remains challenging due to the mediocre characteristics of the existing
+            datasets on Human-Scene Interaction (HSI); they only have limited scale/quality
+            and lack semantics. To fill in the gap, we propose a large-scale and semantic-rich
+            synthetic HSI dataset, denoted as HUMANISE, by aligning the captured human
+            motion sequences with various 3D indoor scenes. We automatically annotate
+            the aligned motions with language descriptions that depict the action and the
+            individual interacting objects; e.g., sit on the armchair near the desk. HUMANISE
+            thus enables a new generation task, language-conditioned human motion generation
+            in 3D scenes. The proposed task is challenging as it requires joint modeling
+            of the 3D scene, human motion, and natural language. To tackle this task, we
+            present a novel scene-and-language conditioned generative model that can produce
+            3D human motions of the desirable action interacting with the specified objects.
+            Our experiments demonstrate that our model generates diverse and semantically
+            consistent human motions in 3D scenes. We believe our proposed dataset and
+            model can facilitate the HSI research, and will release them for research purposes.</p>
+
+          <p style="text-align:justify; padding-top: 1em;"><b>TL;DR:</b>&nbsp; We propose a large-scale 
+            and semantic-rich human-scene interaction dataset, HUMANISE. It has language description for 
+            each human-scene interaction. HUMANISE enables a new task: language-conditioned human motion 
+            generation in 3D scenes. </p>
+        </div>
+
+        <hr>
+
+        <div class="content-block">
+          <h2 class="sub-title has-text-centered">Dataset Gallery</h2>
+          
+          <div class="action">
+            <h3 class="subsub-title"> 1. walk </h3>
+            <table class="table is-bordered">
+              <tbody>
+                <tr>
+                  <td>
+                    <video controls="controls" loop="loop" autoplay="autoplay">
+                      <source src="./figure/place/place01.mp4" type="video/mp4">
+                    </video>
+                  </td>
+                  <td>
+                    <video controls="controls" loop="loop" autoplay="autoplay">
+                      <source src="./figure/place/place01.mp4" type="video/mp4">
+                    </video>
+                  </td>
+                </tr>
+                <tr>
+                  <td>place something on the coffee table</td>
+                  <td>place something on the table that is in the center of the armchair and the kitchen counter</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="action">
+            <h3 class="subsub-title"> 2. Sit </h3>
+            <table class="table is-bordered">
+              <tbody>
+                <tr>
+                  <td>
+                    <video controls="controls" loop="loop" autoplay="autoplay">
+                      <source src="./figure/place/place01.mp4" type="video/mp4">
+                    </video>
+                  </td>
+                  <td>
+                    <video controls="controls" loop="loop" autoplay="autoplay">
+                      <source src="./figure/place/place01.mp4" type="video/mp4">
+                    </video>
+                  </td>
+                </tr>
+                <tr>
+                  <td>place something on the coffee table</td>
+                  <td>place something on the table that is in the center of the armchair and the kitchen counter</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="action">
+            <h3 class="subsub-title"> 3. Stand up </h3>
+            <table class="table is-bordered">
+              <tbody>
+                <tr>
+                  <td>
+                    <video controls="controls" loop="loop" autoplay="autoplay">
+                      <source src="./figure/place/place01.mp4" type="video/mp4">
+                    </video>
+                  </td>
+                  <td>
+                    <video controls="controls" loop="loop" autoplay="autoplay">
+                      <source src="./figure/place/place01.mp4" type="video/mp4">
+                    </video>
+                  </td>
+                </tr>
+                <tr>
+                  <td>place something on the coffee table</td>
+                  <td>place something on the table that is in the center of the armchair and the kitchen counter</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="action">
+            <h3 class="subsub-title"> 4. Lie down </h3>
+            <table class="table is-bordered">
+              <tbody>
+                <tr>
+                  <td>
+                    <video controls="controls" loop="loop" autoplay="autoplay">
+                      <source src="./figure/place/place01.mp4" type="video/mp4">
+                    </video>
+                  </td>
+                  <td>
+                    <video controls="controls" loop="loop" autoplay="autoplay">
+                      <source src="./figure/place/place01.mp4" type="video/mp4">
+                    </video>
+                  </td>
+                </tr>
+                <tr>
+                  <td>place something on the coffee table</td>
+                  <td>place something on the table that is in the center of the armchair and the kitchen counter</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="action">
+            <h3 class="subsub-title"> 5. Place something</h3>
+            <table class="table is-bordered">
+              <tbody>
+                <tr>
+                  <td>
+                    <video controls="controls" loop="loop" autoplay="autoplay">
+                      <source src="./figure/place/place01.mp4" type="video/mp4">
+                    </video>
+                  </td>
+                  <td>
+                    <video controls="controls" loop="loop" autoplay="autoplay">
+                      <source src="./figure/place/place01.mp4" type="video/mp4">
+                    </video>
+                  </td>
+                </tr>
+                <tr>
+                  <td>place something on the coffee table</td>
+                  <td>place something on the table that is in the center of the armchair and the kitchen counter</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="content-block">
+          <h2 class="sub-title has-text-centered">Results</h2>
+
+          <p>We present some qualitative results generated by our proposed model.</p>
+          
+          <div class="action">
+            <h3 class="subsub-title">  </h3>
+            <table class="table is-bordered">
+              <tbody>
+                <tr>
+                  <td>
+                    <video controls="controls" loop="loop" autoplay="autoplay">
+                      <source src="./figure/place/place01.mp4" type="video/mp4">
+                    </video>
+                  </td>
+                  <td>
+                    <video controls="controls" loop="loop" autoplay="autoplay">
+                      <source src="./figure/place/place01.mp4" type="video/mp4">
+                    </video>
+                  </td>
+                </tr>
+                <tr>
+                  <td>place something on the coffee table</td>
+                  <td>place something on the table that is in the center of the armchair and the kitchen counter</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="has-text-centered content-block">
+          <h2 class="sub-title">Bibtex</h2>
+          <p style="text-align:justify">If you find our project useful, please consider citing us:</p>
+          <div style="padding-top: 1rem; text-align: left;">
+<pre><code>@INPROCEEDINGS{Chen2022ECCV,
+  author = {Anpei Chen and Zexiang Xu and Andreas Geiger and Jingyi Yu and Hao Su},
+  title = {TensoRF: Tensorial Radiance Fields},
+  booktitle = {European Conference on Computer Vision (ECCV)},
+  year = {2022}
+}</code></pre>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    
+    <footer class="footer" style="padding: 0 0 1.5rem 0">
+      <div class="columns">
+        <div class="column" :class="[content, offset]">
+          <hr>
+          <p class="has-text-centered" style="font-size: 0.9em;">This website is designed and coded by the authors. Send feedback and questions to <a href="https://silvester.wang">Zan Wang</a></p>
+        </div>
+      </div>
+    </footer>
+  </div>
+</body>
+
+<script type="module">
+  import { createApp } from 'vue'
+
+  let app = createApp({
+    data() {
+      return {
+        content: 'is-6',
+        offset: 'is-offset-3'
+      }
+    }
+  }).mount('#app')
+
+  function displayWindowSize() {
+    let w = document.documentElement.clientWidth;
+    console.log(w)
+    let c;
+    let o;
+    if (w >= 1200) {
+      c = 'is-6'
+      o = 'is-offset-3'
+    } else {
+      if (w >= 900) {
+        c = 'is-8'
+        o = 'is-offset-2'
+      } else {
+        c = 'is-10'
+        o = 'is-offset-1'
+      }
+    }
+    app.$data.content = c
+    app.$data.offset = o
+  }
+  window.addEventListener("resize", displayWindowSize);
+  displayWindowSize();
+</script>
+
+</html>
