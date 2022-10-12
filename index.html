@@ -70,25 +70,27 @@
           <table style="margin-bottom: 16px; width: 100%;">
             <tbody>
               <tr>
-                <td><p class="author"><a href="https://silvester.wang">Zan Wang</a><sup>1,3</sup></p></td>
-                <td><p class="author"><a href="https://yixchen.github.io/">Yixin Chen</a><sup>3</sup></p></td>
-                <td><p class="author"><a href="http://tengyu.ai/">Tengyu Liu</a><sup>3</sup></p></td>
-                <td><p class="author"><a href="https://yzhu.io/">Yixin Zhu</a><sup>2</sup></p></td>
-                <td><p class="author"><a href="https://liangwei-bit.github.io/web/">Wei Liang</a><sup>1</sup></p></td>
-                <td><p class="author"><a href="https://siyuanhuang.com/">Siyuan Huang</a><sup>3</sup></p></td>
+                <td><p class="author"><a href="https://silvester.wang">Zan Wang</a><sup>1,2</sup></p></td>
+                <td><p class="author"><a href="https://yixchen.github.io/">Yixin Chen</a><sup>2</sup></p></td>
+                <td><p class="author"><a href="http://tengyu.ai/">Tengyu Liu</a><sup>2</sup></p></td>
+                <td><p class="author"><a href="https://yzhu.io/">Yixin Zhu</a><sup>3*</sup></p></td>
+                <td><p class="author"><a href="https://liangwei-bit.github.io/web/">Wei Liang</a><sup>1,4*</sup></p></td>
+                <td><p class="author"><a href="https://siyuanhuang.com/">Siyuan Huang</a><sup>2*</sup></p></td>
               </tr>
             </tbody>
           </table>
 
+          <p style="font-size: 16px; padding-bottom: 0.5em;">* indicates corresponding authors</p>
+
           <p style="font-size: 16px;">
-            <sup>1</sup>Beijing Institute of Technology &nbsp;&nbsp;&nbsp;
-            <sup>2</sup>Peking University <br>
-            <sup>3</sup>Beijing Institute for General Artificial Intelligence (BIGAI)
+            <sup>1</sup>School of Computer Science & Technology, Beijing Institute of Technology<br>
+            <sup>2</sup>Beijing Institute for General Artificial Intelligence (BIGAI)<br>
+            <sup>3</sup>Institute for Artificial Intelligence, Peking University<br>
+            <sup>4</sup>Yangtze Delta Region Academy of Beijing Institute of Technology, Jiaxing<br>
           </p>
 
           <div style="margin: 16px 0; font-size: 18px;">
-            Paper and code coming soon.
-            <!-- <p> <a>Paper</a> &nbsp;|&nbsp; <a>arXiv</a> &nbsp;|&nbsp; <a>Code</a> &nbsp;|&nbsp; <a>Data</a> </p> -->
+            <p> <a>Paper</a> &nbsp;|&nbsp; <a>arXiv</a> &nbsp;|&nbsp; <a href="https://github.com/Silverster98/HUMANISE">Code</a> &nbsp;|&nbsp; <a href="https://drive.google.com/drive/folders/1i7J2wXE2WO_3mfsvrJ-geITFiDnmqDkY">Data</a> </p>
           </div>
 
           <figure class="image" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
@@ -101,22 +103,8 @@
         <div class="has-text-centered content-block">
           <h2 class="sub-title">Abstract</h2>
           <p style="text-align:justify">
-            Learning to generate diverse scene-aware and goal-oriented human motions in
-            3D scenes remains challenging due to the mediocre characteristics of the existing
-            datasets on Human-Scene Interaction (HSI); they only have limited scale/quality
-            and lack semantics. To fill in the gap, we propose a large-scale and semantic-rich
-            synthetic HSI dataset, denoted as HUMANISE, by aligning the captured human
-            motion sequences with various 3D indoor scenes. We automatically annotate
-            the aligned motions with language descriptions that depict the action and the
-            individual interacting objects; e.g., sit on the armchair near the desk. HUMANISE
-            thus enables a new generation task, language-conditioned human motion generation
-            in 3D scenes. The proposed task is challenging as it requires joint modeling
-            of the 3D scene, human motion, and natural language. To tackle this task, we
-            present a novel scene-and-language conditioned generative model that can produce
-            3D human motions of the desirable action interacting with the specified objects.
-            Our experiments demonstrate that our model generates diverse and semantically
-            consistent human motions in 3D scenes. We believe our proposed dataset and
-            model can facilitate the HSI research, and will release them for research purposes.</p>
+            Learning to generate diverse scene-aware and goal-oriented human motions in 3D scenes remains challenging due to the mediocre characteristics of the existing datasets on Human-Scene Interaction(HSI); they only have limited scale/quality and lack semantics. To fill in the gap, we propose a large-scale and semantic-rich synthetic HSI dataset, denoted as <i>HUMANISE</i>, by aligning the captured human motion sequences with various 3D indoor scenes. We automatically annotate the aligned motions with language descriptions that depict the action and the unique interacting objects in the scene; <i>e.g.</i>, sit on the armchair near the desk. <i>HUMANISE</i> thus enables a new generation task, <i>language-conditioned human motion generation in 3D scenes</i>. The proposed task is challenging as it requires joint modeling of the 3D scene, human motion, and natural language. To tackle this task, we present a novel scene-and-language conditioned generative model that can produce 3D human motions of the desirable action interacting with the specified objects. Our experiments demonstrate that our model generates diverse and semantically consistent human motions in 3D scenes.
+          </p>
 
           <p style="text-align:justify; padding-top: 1em;"><b>TL;DR:</b>&nbsp; We propose a large-scale 
             and semantic-rich human-scene interaction dataset, HUMANISE. It has language description for 
@@ -289,6 +277,12 @@
           <p style="text-align:justify">If you find our project useful, please consider citing us:</p>
           <div style="padding-top: 1rem; text-align: left;">
 <pre><code>
+@inproceedings{wang2022humanise,
+  title={HUMANISE: Language-conditioned Human Motion Generation in 3D Scenes},
+  author={Wang, Zan and Chen, Yixin and Liu, Tengyu and Zhu, Yixin and Liang, Wei and Huang, Siyuan},
+  booktitle={Advances in Neural Information Processing Systems (NIPS)},
+  year={2022}
+}
 </code></pre>
           </div>
         </div>
