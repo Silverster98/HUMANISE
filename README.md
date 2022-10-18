@@ -1,7 +1,3 @@
-<div align=center>
-<img src='./figure/teaser.png' width=60%>
-</div>
-
 # HUMANISE: Language-conditioned Human Motion Generation in 3D Scenes
 
 Created by 
@@ -18,7 +14,10 @@ In this work, we propose a large-scale and semantic-rich human-scene interaction
 
 [Paper](https://silvester.wang/HUMANISE/paper.pdf) | [arXiv]() | [Project Page](https://github.com/Silverster98/HUMANISE) | [Data](https://docs.google.com/forms/d/e/1FAIpQLSfzhj2wrRLqAXFVOTn8K5NDN-J_5HueRTohMAlayqBuPPWA1w/viewform?usp=sf_link)
 
-<img src='./figure/teaser_md.png' weight="50%">
+<!-- <img src='./figure/teaser_md.png' weight="50%"> -->
+<div align=center>
+<img src='./figure/teaser_md.png' width=60%>
+</div>
 
 ## Abstract
 
