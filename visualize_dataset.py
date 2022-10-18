@@ -127,7 +127,7 @@ def visualize_result(path, index=0, vis=False, save_folder=None, del_imgs=True):
         start=0,
     )
     if del_imgs:
-        os.system("rm -rf {}".format(os.path.join(save_folder, 'imgs')))
+        os.system('rm -rf "{}"'.format(os.path.join(save_folder, 'imgs')))
     
     print('done.')
 
@@ -143,8 +143,8 @@ def visualize_and_save_all(action, save_folder):
         uid = pkl.split('/')[-2]
         sdir = os.path.join(save_folder, uid)
 
-        if int(uid[5:9]) > 20:
-            break
+        # if int(uid[5:9]) > 20:
+        #     break
         
         os.makedirs(sdir, exist_ok=True)
         print(f'rendering video in {sdir}')

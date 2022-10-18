@@ -76,7 +76,7 @@ If you find our project useful, please consider citing us:
 @inproceedings{wang2022humanise,
   title={HUMANISE: Language-conditioned Human Motion Generation in 3D Scenes},
   author={Wang, Zan and Chen, Yixin and Liu, Tengyu and Zhu, Yixin and Liang, Wei and Huang, Siyuan},
-  booktitle={Advances in Neural Information Processing Systems (NIPS)},
+  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
   year={2022}
 }
 ```
