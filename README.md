@@ -1,16 +1,16 @@
-# *HUMANISE*: <br/>Language-conditioned Human Motion Generation in 3D Scenes
+# *HUMANISE*: Language-conditioned Human Motion Generation in 3D Scenes
 
 <p align="left">
-    <a href=''>
+    <a href='https://arxiv.org/abs/2210.09729'>
       <img src='https://img.shields.io/badge/Paper-arXiv-green?style=plastic&logo=arXiv&logoColor=green' alt='Paper arXiv'>
     </a>
-    <a href='https://github.com/Silverster98/HUMANISE'>
+    <a href='https://silvester.wang/HUMANISE/paper.pdf'>
       <img src='https://img.shields.io/badge/Paper-PDF-red?style=plastic&logo=adobeacrobatreader&logoColor=red' alt='Paper PDF'>
     </a>
     <a href='https://silverster98.github.io/HUMANISE/'>
       <img src='https://img.shields.io/badge/Project-Page-blue?style=plastic&logo=Google%20chrome&logoColor=blue' alt='Project Page'>
     </a>
-     <a href='https://silverster98.github.io/HUMANISE/'>
+     <a href='https://docs.google.com/forms/d/e/1FAIpQLSfzhj2wrRLqAXFVOTn8K5NDN-J_5HueRTohMAlayqBuPPWA1w/viewform?usp=sf_link'>
       <img src='https://img.shields.io/badge/Dataset-Data-yellow?style=plastic&logo=Google%20chrome&logoColor=yellow' alt='Dataset'>
     </a>
 </p>
@@ -26,7 +26,7 @@ This repository is an official implementation of "HUMANISE: Language-conditioned
 
 In this work, we propose a large-scale and semantic-rich human-scene interaction dataset, HUMANISE. It has language description for each human-scene interaction. HUMANISE enables a new task: language-conditioned human motion generation in 3D scenes. 
 
-[Paper](https://silvester.wang/HUMANISE/paper.pdf) | [arXiv](https://arxiv.org/abs/2210.09729) | [Project Page](https://github.com/Silverster98/HUMANISE) | [Data](https://docs.google.com/forms/d/e/1FAIpQLSfzhj2wrRLqAXFVOTn8K5NDN-J_5HueRTohMAlayqBuPPWA1w/viewform?usp=sf_link)
+[Paper](https://silvester.wang/HUMANISE/paper.pdf) | [arXiv](https://arxiv.org/abs/2210.09729) | [Project Page](https://silverster98.github.io/HUMANISE) | [Data](https://docs.google.com/forms/d/e/1FAIpQLSfzhj2wrRLqAXFVOTn8K5NDN-J_5HueRTohMAlayqBuPPWA1w/viewform?usp=sf_link)
 
 <!-- <img src='./figure/teaser_md.png' weight="50%"> -->
 <div align=center>
