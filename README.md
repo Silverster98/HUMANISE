@@ -1,6 +1,20 @@
-# HUMANISE: Language-conditioned Human Motion Generation in 3D Scenes
+# *HUMANISE*: <br/>Language-conditioned Human Motion Generation in 3D Scenes
 
-Created by 
+<p align="left">
+    <a href=''>
+      <img src='https://img.shields.io/badge/Paper-arXiv-green?style=plastic&logo=arXiv&logoColor=green' alt='Paper arXiv'>
+    </a>
+    <a href='https://github.com/Silverster98/HUMANISE'>
+      <img src='https://img.shields.io/badge/Paper-PDF-red?style=plastic&logo=adobeacrobatreader&logoColor=red' alt='Paper PDF'>
+    </a>
+    <a href='https://silverster98.github.io/HUMANISE/'>
+      <img src='https://img.shields.io/badge/Project-Page-blue?style=plastic&logo=Google%20chrome&logoColor=blue' alt='Project Page'>
+    </a>
+     <a href='https://silverster98.github.io/HUMANISE/'>
+      <img src='https://img.shields.io/badge/Dataset-Data-yellow?style=plastic&logo=Google%20chrome&logoColor=yellow' alt='Dataset'>
+    </a>
+</p>
+
 [Zan Wang](https://silvester.wang),
 [Yixin Chen](https://yixchen.github.io/),
 [Tengyu Liu](http://tengyu.ai/),
