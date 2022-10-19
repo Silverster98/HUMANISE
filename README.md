@@ -12,7 +12,7 @@ This repository is an official implementation of "HUMANISE: Language-conditioned
 
 In this work, we propose a large-scale and semantic-rich human-scene interaction dataset, HUMANISE. It has language description for each human-scene interaction. HUMANISE enables a new task: language-conditioned human motion generation in 3D scenes. 
 
-[Paper](https://silvester.wang/HUMANISE/paper.pdf) | [arXiv]() | [Project Page](https://github.com/Silverster98/HUMANISE) | [Data](https://docs.google.com/forms/d/e/1FAIpQLSfzhj2wrRLqAXFVOTn8K5NDN-J_5HueRTohMAlayqBuPPWA1w/viewform?usp=sf_link)
+[Paper](https://silvester.wang/HUMANISE/paper.pdf) | [arXiv](https://arxiv.org/abs/2210.09729) | [Project Page](https://github.com/Silverster98/HUMANISE) | [Data](https://docs.google.com/forms/d/e/1FAIpQLSfzhj2wrRLqAXFVOTn8K5NDN-J_5HueRTohMAlayqBuPPWA1w/viewform?usp=sf_link)
 
 <!-- <img src='./figure/teaser_md.png' weight="50%"> -->
 <div align=center>
