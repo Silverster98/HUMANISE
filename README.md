@@ -11,7 +11,7 @@
       <img src='https://img.shields.io/badge/Project-Page-blue?style=plastic&logo=Google%20chrome&logoColor=blue' alt='Project Page'>
     </a>
      <a href='https://docs.google.com/forms/d/e/1FAIpQLSfzhj2wrRLqAXFVOTn8K5NDN-J_5HueRTohMAlayqBuPPWA1w/viewform?usp=sf_link'>
-      <img src='https://img.shields.io/badge/Dataset-Data-yellow?style=plastic&logo=Google%20chrome&logoColor=yellow' alt='Dataset'>
+      <img src='https://img.shields.io/badge/Dataset-Data-yellow?style=plastic&logo=Databricks&logoColor=yellow' alt='Dataset'>
     </a>
 </p>
 
@@ -39,31 +39,33 @@ Learning to generate diverse scene-aware and goal-oriented human motions in 3D s
 
 ## Preparation
 
-### 1. Installation
+### 1. Environment Setup
 
 ### 2. Data Preparation
 
-1. Download [ScanNet](http://www.scan-net.org/) Dataset.
+1. [ScanNet V2](http://www.scan-net.org/) Dataset
 
-Notes, change the dataset folder configuration in `utils/configuration.py`. 
+Remember to change the dataset folder configuration in `utils/configuration.py`. 
+
+2. Our pre-synthesized [data](https://docs.google.com/forms/d/e/1FAIpQLSfzhj2wrRLqAXFVOTn8K5NDN-J_5HueRTohMAlayqBuPPWA1w/viewform?usp=sf_link), or you can generate your own data with our pipeline, see [HUMANISE Synthesis](./dataset/README.md) for more details.
+
+3. [SMPLX v1.1](https://smpl-x.is.tue.mpg.de/download.php)
 
 ## HUMANISE Dataset
 
 ### 1. Synthesis
 
-```bash
-
-```
-
+See [HUMANISE Synthesis](./dataset/README.md) for more details.
 
 ### 2. Visualization
 
-For HUMANISE dataset visualization, we provide rendering script as following, which will render an animation video with top-down view. The result will be saved in `./tmp/`.
+For HUMANISE dataset visualization, we provide rendering script `visualize_dataset.py` which will render an animation video with top-down view. The result will be saved in `./tmp/`.
 
 - on-screen rendering
 
 ```bash
-python visualize_dataset.py --pkl your_path/lie/scene0000_001810_c71dc702-1f1d-4381-895c-f07e9a10876b/anno.pkl --index 0 --vis
+python visualize_dataset.py --pkl ${PKL} --index ${index} --vis
+# python visualize_dataset.py --pkl your_path/lie/scene0000_001810_c71dc702-1f1d-4381-895c-f07e9a10876b/anno.pkl --index 0 --vis
 ```
 
 Notes: `--vis` will render the static human-scene interaction with [trimesh](https://trimsh.org/trimesh.html) on screen.
@@ -71,8 +73,11 @@ Notes: `--vis` will render the static human-scene interaction with [trimesh](htt
 - off-screen rendering
 
 ```bash
-PYOPENGL_PLATFORM=egl python visualize_dataset.py --pkl your_path/lie/scene0000_001810_c71dc702-1f1d-4381-895c-f07e9a10876b/anno.pkl --index 0
+PYOPENGL_PLATFORM=egl python visualize_dataset.py --pkl ${PKL} --index ${index}
+# PYOPENGL_PLATFORM=egl python visualize_dataset.py --pkl your_path/lie/scene0000_001810_c71dc702-1f1d-4381-895c-f07e9a10876b/anno.pkl --index 0
 ```
+
+See more information about the [data format](./dataset/README.md#file-format).
 
 ## Our Model
 
