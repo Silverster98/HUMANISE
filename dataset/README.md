@@ -21,7 +21,7 @@ Following the next steps to synthesize your own data.
 - [ReferIt3D](https://referit3d.github.io/) dataset
     - In our implementation, we use `sr3d` annotation, which contains referential language descriptions for the objects.
 
-## 2. Extract motion segments from BABEL
+## 2. Extract Motion Segments from BABEL
 
 Run the following command to extract the motion segments.
     
@@ -36,7 +36,7 @@ python dataset/babel_process.py --action "$ACTION" # e.g., dataset/python babel_
 
 You can directly download our pre-processed motion segments from the [link](https://docs.google.com/forms/d/e/1FAIpQLSfzhj2wrRLqAXFVOTn8K5NDN-J_5HueRTohMAlayqBuPPWA1w/viewform?usp=sf_link). (The pre-processed motion segments are in the `pure_motion` folder in the shared drive folder.)
 
-## 3. Align motion segments with ScanNet Scene
+## 3. Align Motion Segments with ScanNet Scenes
 
 Remember to change the folder path in `utils/configuration.py`.
 
