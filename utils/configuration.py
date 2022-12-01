@@ -3,7 +3,6 @@ import os
 import time
 
 smplx_folder = '/home/wangzan/Data/SHADE/models_smplx_v1_1/models/'
-vposer_folder = '/home/wangzan/Data/SHADE/V02_05/'
 scan2cad_anno = '/home/wangzan/Data/scan2cad/scan2cad_download_link/full_annotations.json'
 scannet_folder = '/home/wangzan/Data/scannet/scans/'
 referit3d_sr3d = '/home/wangzan/Data/referit3d/sr3d.csv'
@@ -11,6 +10,7 @@ referit3d_sr3d = '/home/wangzan/Data/referit3d/sr3d.csv'
 pure_motion_folder = '/home/wangzan/Data/motion/pure_motion/'
 align_data_folder = '/home/wangzan/Data/motion/align_data_release/'
 preprocess_scene_folder = '/home/wangzan/Projects/Pointnet2.ScanNet/preprocessing/scannet_scenes'
+
 
 ## train & test
 batch_size = 16
@@ -20,12 +20,15 @@ device = 'cuda'
 resume_model = ''
 num_workers = 0
 weight_loss_rec = 1.0
+weight_loss_rec_pose = 1.0
+weight_loss_rec_vertex = 1.0
 weight_loss_kl = 0.1
 weight_loss_vposer = 1e-3
-verbose = 10
+weight_loss_ground = 1.0
+action = 'sit'
 
 ## model setting
-pointnet2_pretrained_model = '/home/wangzan/Projects/Pointnet2.ScanNet/outputs/2022-04-05_15-47-47_SSG/model_last.pth'
+pretrained_scene_model = ''
 lang_feat_size = 768
 scene_feat_size = 512
 scene_group_size = 16 # pointnet++ final output size
@@ -83,6 +86,14 @@ def parse_args():
                         type=float,
                         default=weight_loss_rec,
                         help='loss weight of rec loss')
+    parser.add_argument('--weight_loss_rec_pose',
+                        type=float,
+                        default=weight_loss_rec_pose,
+                        help='loss weight of rec pose loss')
+    parser.add_argument('--weight_loss_rec_vertex',
+                        type=float,
+                        default=weight_loss_rec_vertex,
+                        help='loss weight of rec vertex loss')
     parser.add_argument('--weight_loss_kl',
                         type=float,
                         default=weight_loss_kl,
@@ -91,15 +102,22 @@ def parse_args():
                         type=float,
                         default=weight_loss_vposer,
                         help='loss weight of vposer loss')
-    parser.add_argument('--verbose',
+    parser.add_argument('--weight_loss_ground',
                         type=float,
-                        default=verbose,
-                        help='verbose')
-    ## model setting
-    parser.add_argument('--pointnet2_pretrained_model',
+                        default=weight_loss_ground,
+                        help='loss weight of ground loss')
+    parser.add_argument('--all_body_vertices',
+                        action="store_true",
+                        help='use all body vertices to regress')
+    parser.add_argument('--action',
                         type=str,
-                        default=pointnet2_pretrained_model,
-                        help='pointnet++ pre-trained model')
+                        default=action,
+                        help='action type')
+    ## model setting
+    parser.add_argument('--pretrained_scene_model',
+                        type=str,
+                        default=pretrained_scene_model,
+                        help='pre-trained scene model')
     parser.add_argument('--lang_feat_size',
                         type=int,
                         default=lang_feat_size,

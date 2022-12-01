@@ -81,11 +81,30 @@ See more information about the [data format](./dataset/README.md#file-format).
 
 ## Our Model
 
-### Train
+### Action-Specific Model
 
-### Test
+- Train
 
-### Results
+  ```bash
+  bash scripts/train.sh "${ACTION}"
+  # bash scripts/train.sh "walk"
+  ```
+
+- Eval (Quantitative)
+
+  ```bash
+  bash scripts/eval_metric.sh ${STAMP} "${ACTION}"
+  # bash scripts/eval_metric.sh 20220829_194320 "walk"
+  ```
+
+- Eval (Qualitative)
+
+  ```bash
+  bash scripts/eval.sh ${STAMP} "${ACTION}"
+  # bash scripts/eval.sh 20220829_194320 "walk"
+  ```
+
+### Action-Agnostic Model
 
 ## Citation
 
