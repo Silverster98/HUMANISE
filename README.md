@@ -106,6 +106,20 @@ See more information about the [data format](./dataset/README.md#file-format).
 
 ### Action-Agnostic Model
 
+coming soon!
+
+---
+
+You can use our pretrained [models](https://docs.google.com/forms/d/e/1FAIpQLSfzhj2wrRLqAXFVOTn8K5NDN-J_5HueRTohMAlayqBuPPWA1w/viewform?usp=sf_link). (In the `checkpoints` folder)
+
+|STAMP|Pretrained Models|
+|-|-|
+|POINTTRANS_C_32768|scene model (point transformer)|
+|20220829_194320|action-specific model (walk)|
+|20220830_203617|action-specific model (sit)|
+|20220830_203832|action-specific model (stand up)|
+|20220830_204043|action-specific model (lie)|
+
 ## Citation
 
 If you find our project useful, please consider citing us:
