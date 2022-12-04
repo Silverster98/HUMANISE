@@ -81,6 +81,10 @@ See more information about the [data format](./dataset/README.md#file-format).
 
 ## Our Model
 
+### Preprocess ScanNet Scenes
+
+Following [link](https://github.com/daveredrum/Pointnet2.ScanNet#preprocess-scannet-scenes) to preprocess the ScanNet scenes; then change the `preprocess_scene_folder` configuration in `utils/configuration.py`.
+
 ### Action-Specific Model
 
 - Train
