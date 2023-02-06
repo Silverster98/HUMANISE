@@ -42,16 +42,11 @@ Learning to generate diverse scene-aware and goal-oriented human motions in 3D s
 ### 1. Environment Setup
 
 - Install the following key libraries:
-  - pytorch
-  - numpy
-  - trimesh
-  - smplx
-  - pyquaternion
-  - pyrender
-  - scikit-learn
-  - natsort
-  - pillow
-  - tqdm
+  - pytorch, numpy, trimesh, smplx, pyquaternion, pyrender, scikit-learn, natsort, pillow, tqdm, ...
+
+- Make sure your machine supports on-screen/[off-screen](https://pyrender.readthedocs.io/en/latest/examples/offscreen.html) rendering.
+
+Notes: we run our code with pytorch 1.10 and cuda11.3.
 
 ### 2. Data Preparation
 
@@ -135,14 +130,14 @@ Following [link](https://github.com/daveredrum/Pointnet2.ScanNet#preprocess-scan
 
     ```bash
     bash scripts/eval.sh ${STAMP} "${ACTION}"
-    # bash scripts/eval.sh 20220829_194320 "walk"
+    # e.g., bash scripts/eval.sh 20220829_194320 "walk"
     ```
   
   - Qualitative results of generation. Comment Line 36 and uncomment Line 35 in `eval_motion.py`. The parameter `k` in `solver.save_k_sample(k: int)` indicates the number of samples for each case.
 
     ```bash
     bash scripts/eval.sh ${STAMP} "${ACTION}"
-    # bash scripts/eval.sh 20220829_194320 "walk"
+    # e.g., bash scripts/eval.sh 20220829_194320 "walk"
     ```
 
 ### Action-Agnostic Model
