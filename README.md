@@ -41,11 +41,23 @@ Learning to generate diverse scene-aware and goal-oriented human motions in 3D s
 
 ### 1. Environment Setup
 
+- Install the following key libraries:
+  - pytorch
+  - numpy
+  - trimesh
+  - smplx
+  - pyquaternion
+  - pyrender
+  - scikit-learn
+  - natsort
+  - pillow
+  - tqdm
+
 ### 2. Data Preparation
 
 1. [ScanNet V2](http://www.scan-net.org/) Dataset
 
-Remember to change the dataset folder configuration in `utils/configuration.py`. 
+    Remember to change the dataset folder configuration in `utils/configuration.py`. 
 
 2. Our pre-synthesized [data](https://docs.google.com/forms/d/e/1FAIpQLSfzhj2wrRLqAXFVOTn8K5NDN-J_5HueRTohMAlayqBuPPWA1w/viewform?usp=sf_link), or you can generate your own data with our pipeline, see [HUMANISE Synthesis](./dataset/README.md) for more details.
 
@@ -91,22 +103,47 @@ Following [link](https://github.com/daveredrum/Pointnet2.ScanNet#preprocess-scan
 
   ```bash
   bash scripts/train.sh "${ACTION}"
-  # bash scripts/train.sh "walk"
+  # e.g., bash scripts/train.sh "walk"
   ```
 
 - Eval (Quantitative)
 
-  ```bash
-  bash scripts/eval_metric.sh ${STAMP} "${ACTION}"
-  # bash scripts/eval_metric.sh 20220829_194320 "walk"
-  ```
+  - Reconstruction metrics.
+
+    ```bash
+    bash scripts/eval_metric.sh ${STAMP} "${ACTION}"
+    # e.g., bash scripts/eval_metric.sh 20220829_194320 "walk"
+    ```
+
+  - Generation metrics (goal dist.). Set `eval_rec=False` (Line 64) in eval_metric_motion.py to compute generation metrics. Then run the following script. It will take several hours to compute the results.
+    
+    ```bash
+    bash scripts/eval_metric.sh ${STAMP} "${ACTION}"
+    # e.g., bash scripts/eval_metric.sh 20220829_194320 "walk"
+    ```
+
+  - Generation metrics (APD).
+
+    ```bash
+    bash scripts/eval_pairwise_distance.sh ${STAMP} "${ACTION}"
+    # e.g., bash scripts/eval_pairwise_distance.sh 20220829_194320 "walk"
+    ```
 
 - Eval (Qualitative)
 
-  ```bash
-  bash scripts/eval.sh ${STAMP} "${ACTION}"
-  # bash scripts/eval.sh 20220829_194320 "walk"
-  ```
+  - Qualitative results of reconstruction.
+
+    ```bash
+    bash scripts/eval.sh ${STAMP} "${ACTION}"
+    # bash scripts/eval.sh 20220829_194320 "walk"
+    ```
+  
+  - Qualitative results of generation. Comment Line 36 and uncomment Line 35 in `eval_motion.py`. The parameter `k` in `solver.save_k_sample(k: int)` indicates the number of samples for each case.
+
+    ```bash
+    bash scripts/eval.sh ${STAMP} "${ACTION}"
+    # bash scripts/eval.sh 20220829_194320 "walk"
+    ```
 
 ### Action-Agnostic Model
 
@@ -124,6 +161,17 @@ You can use our pretrained [models](https://docs.google.com/forms/d/e/1FAIpQLSfz
 |20220830_203832|action-specific model (stand up)|
 |20220830_204043|action-specific model (lie)|
 
+Put the downloaded checkpoints into `outputs/` folder as following:
+```bash
+-| model/
+-| outputs/
+---| POINTTRANS_C_32768/
+---| 20220829_194320/
+---| ...
+-| scripts/
+-| ...
+```
+
 ## Citation
 
 If you find our project useful, please consider citing us:
@@ -138,4 +186,6 @@ If you find our project useful, please consider citing us:
 ```
 
 ## Acknowledgements
+
+Some codes are borrowed from [PSI-release](https://github.com/yz-cnsdqz/PSI-release), [point-transformer](https://github.com/POSTECH-CVLab/point-transformer), [Pointnet2.ScanNet](https://github.com/daveredrum/Pointnet2.ScanNet), and [YouRefIt_ERU](https://github.com/yixchen/YouRefIt_ERU).
 
