@@ -25,6 +25,7 @@ weight_loss_rec_vertex = 1.0
 weight_loss_kl = 0.1
 weight_loss_vposer = 1e-3
 weight_loss_ground = 1.0
+weight_loss_classify = 1.0
 action = 'sit'
 
 ## model setting
@@ -106,6 +107,10 @@ def parse_args():
                         type=float,
                         default=weight_loss_ground,
                         help='loss weight of ground loss')
+    parser.add_argument('--weight_loss_classify',
+                        type=float,
+                        default=weight_loss_classify,
+                        help='loss weight of classify loss')
     parser.add_argument('--all_body_vertices',
                         action="store_true",
                         help='use all body vertices to regress')

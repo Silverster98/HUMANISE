@@ -38,6 +38,7 @@ class MotionDataset(Dataset):
         self.max_motion_len = max_motion_len
         self.num_betas = num_betas
         self.num_pca_comps = num_pca_comps
+        self.actions = ['sit', 'walk', 'stand up', 'lie']
 
         aligns = natsorted(glob.glob(os.path.join(self.anno_folder, '{}/*/anno.pkl'.format(action))))
         if phase == 'train':
@@ -305,6 +306,7 @@ class MotionDataset(Dataset):
             point_set[:, 0:3] = cur_scene
             scene_T = rand_T @ scene_T
         
+        action_category = self.actions.index(anno_data['action'])
         target_object_mask = scene_data[:, -2] == anno_data['object_id'] # target object mask
         target_object_verts  = point_set[target_object_mask, 0:3] # target object verts
         target_object_center = (target_object_verts.min(axis=0) + target_object_verts.max(axis=0)) * 0.5 # target object bounding box center
@@ -327,7 +329,7 @@ class MotionDataset(Dataset):
         # print(motion_mask.dtype, motion_mask.shape)
         # exit(0)
 
-        return scene_id, scene_T, point_set, utterance, lang_desc, lang_mask, trans, orient_6D, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask
+        return scene_id, scene_T, point_set, utterance, lang_desc, lang_mask, trans, orient_6D, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask, action_category
 
     def __len__(self):
         return len(self.motion_data_list)
@@ -373,7 +375,7 @@ class MotionDataset(Dataset):
 
 def collate_random_motion(data):
     (scene_id, scene_T, point_set, utterance, lang_desc, lang_mask,
-    trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask) = zip(*data)
+    trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask, action_category) = zip(*data)
 
 
     ## convert to tensor
@@ -388,6 +390,7 @@ def collate_random_motion(data):
     motion_mask = torch.BoolTensor(np.array(motion_mask))
     target_object_center = torch.FloatTensor(np.array(target_object_center))
     target_object_mask = torch.BoolTensor(np.array(target_object_mask))
+    action_category = torch.LongTensor(np.array(action_category))
     
     offset, count = [], 0
     for item in point_set:
@@ -432,6 +435,7 @@ def collate_random_motion(data):
         motion_mask.cuda(),
         target_object_center.cuda(),
         target_object_mask.cuda(),
+        action_category.cuda(),
     )
 
     return batch

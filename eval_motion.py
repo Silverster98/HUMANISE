@@ -32,11 +32,7 @@ def test(args):
     solver = MotionSolver(args, dataloader)
     torch.manual_seed(0) # fix sample data order
 
-    # solver.save_k_sample(k=10)
-    solver.save_rec()
-    # solver.save_k_sample_given_T(T=60)
-    
-    
+    solver.save_k_sample(k=10)
 
 if __name__ == '__main__':
     os.environ['PYOPENGL_PLATFORM'] = 'egl'

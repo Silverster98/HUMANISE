@@ -78,7 +78,7 @@ class MotionSolver():
         # log
         # contains all necessary info for all phases
         self.log = {phase: {} for phase in ["train", "val"]}
-        self.dump_keys = ['loss', 'rec_loss', 'kl_loss', 'vposer_loss', 'rec_trans_loss', 'rec_orient_loss', 'rec_body_pose_loss', 'rec_body_mesh_loss', 'ground_loss']
+        self.dump_keys = ['loss', 'rec_loss', 'kl_loss', 'vposer_loss', 'rec_trans_loss', 'rec_orient_loss', 'rec_body_pose_loss', 'rec_body_mesh_loss', 'ground_loss', 'classify_loss']
 
         self.best = {
             'epoch': 0,
@@ -87,6 +87,7 @@ class MotionSolver():
             'kl_loss': float("inf"),
             'vposer_loss': float("inf"),
             'ground_loss': float("inf"),
+            'classify_loss': float("inf"),
         }
 
         # report model size
@@ -204,13 +205,16 @@ class MotionSolver():
         Return:
             recontruct loss and kl loss
         """
-        target_object, trans, orient, body_pose, betas, hand_pose = x
-        pred_target_object, trans_rec, orient_rec, body_pose_rec, betas_rec, hand_pose_rec = rec_x
+        target_object, action_category, trans, orient, body_pose, betas, hand_pose = x
+        pred_target_object, action_logits, trans_rec, orient_rec, body_pose_rec, betas_rec, hand_pose_rec = rec_x
 
         B, S, _ = trans.shape
         
         ## ground loss
         ground_loss = F.mse_loss(target_object, pred_target_object)
+
+        ## classify loss
+        classify_loss = F.cross_entropy(action_logits, action_category)
 
         ## rec loss, smplx parameters
         rec_trans_loss = (F.l1_loss(
@@ -255,7 +259,7 @@ class MotionSolver():
         ## kl loss
         kl_loss = torch.mean(torch.exp(logvar) + mu ** 2 - 1.0 - logvar)
 
-        return ground_loss, rec_trans_loss, rec_orient_loss, rec_body_pose_loss, rec_body_mesh_loss, kl_loss
+        return ground_loss, classify_loss, rec_trans_loss, rec_orient_loss, rec_body_pose_loss, rec_body_mesh_loss, kl_loss
 
     def _forward(
         self, 
@@ -283,7 +287,7 @@ class MotionSolver():
             D.append(arg.shape[2])
         D = [sum(D[0:i]) for i in range(1, len(D)+1)]
 
-        cond_latent, pred_target_object = self.cond_net(
+        cond_latent, pred_target_object, classify_logits = self.cond_net(
             (point_coords, point_feats, offset),
             (lang_desc, lang_mask),
             betas,
@@ -300,7 +304,7 @@ class MotionSolver():
         for i in range(len(args)):
             rec_args.append(rec_x[:, :, D[i]: D[i+1]])
 
-        return pred_target_object, *rec_args, mu, logvar
+        return pred_target_object, classify_logits, *rec_args, mu, logvar
 
     def _sample(
         self, 
@@ -330,7 +334,7 @@ class MotionSolver():
             D.append(arg.shape[2])
         D = [sum(D[0:i]) for i in range(1, len(D)+1)]
 
-        cond_latent, pred_target_object, atten_score, scene_xyz = self.cond_net(
+        cond_latent, pred_target_object, classify_logits, atten_score, scene_xyz = self.cond_net(
             (point_coords, point_feats, offset),
             (lang_desc, lang_mask),
             betas,
@@ -349,7 +353,7 @@ class MotionSolver():
         for i in range(len(args)):
             rec_args.append(sample_x[:, :, :, D[i]: D[i+1]])
 
-        return pred_target_object, *rec_args, sample_m, atten_score, scene_xyz
+        return pred_target_object, classify_logits, *rec_args, sample_m, atten_score, scene_xyz
 
     def _train(self, train_dataloader: DataLoader, epoch_id: int):
         phase = 'train'
@@ -360,15 +364,15 @@ class MotionSolver():
 
             ## unpack data
             [scene_id, scene_T, point_coords, point_feats, offset, utterance, lang_desc, lang_mask, 
-            trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask] = data
+            trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask, action_category] = data
 
             ## forward
-            [pred_target_object_center, rec_trans, rec_orient, rec_pose_body, mu, logvar] = self._forward(
+            [pred_target_object_center, classify_logits, rec_trans, rec_orient, rec_pose_body, mu, logvar] = self._forward(
                 point_coords, point_feats, offset, lang_desc, lang_mask, betas, motion_mask, trans, orient, pose_body,
             )
-            [ground_loss, rec_trans_loss, rec_orient_loss, rec_body_pose_loss, rec_body_mesh_loss, kl_loss] = self._cal_loss(
-                (target_object_center, trans, orient, pose_body, betas, pose_hand),
-                (pred_target_object_center, rec_trans, rec_orient, rec_pose_body, betas, pose_hand),
+            [ground_loss, classify_loss, rec_trans_loss, rec_orient_loss, rec_body_pose_loss, rec_body_mesh_loss, kl_loss] = self._cal_loss(
+                (target_object_center, action_category, trans, orient, pose_body, betas, pose_hand),
+                (pred_target_object_center, classify_logits, rec_trans, rec_orient, rec_pose_body, betas, pose_hand),
                 mu, logvar, motion_mask
             )
             
@@ -376,7 +380,8 @@ class MotionSolver():
                         self.config.weight_loss_rec * rec_orient_loss + \
                         self.config.weight_loss_rec_pose * rec_body_pose_loss + \
                         self.config.weight_loss_rec_vertex * rec_body_mesh_loss
-            loss = self.config.weight_loss_ground * ground_loss + \
+            loss = self.config.weight_loss_classify * classify_loss + \
+                    self.config.weight_loss_ground * ground_loss + \
                     self.config.weight_loss_kl * kl_loss + \
                     rec_loss
 
@@ -390,6 +395,7 @@ class MotionSolver():
             self.log[phase][epoch_id]['iter_time'].append(iter_time)
             self.log[phase][epoch_id]['loss'].append(loss.item())
             self.log[phase][epoch_id]['ground_loss'].append(ground_loss.item())
+            self.log[phase][epoch_id]['classify_loss'].append(classify_loss.item())
             self.log[phase][epoch_id]['rec_loss'].append(rec_loss.item())
             self.log[phase][epoch_id]['rec_trans_loss'].append(rec_trans_loss.item())
             self.log[phase][epoch_id]['rec_orient_loss'].append(rec_orient_loss.item())
@@ -407,15 +413,15 @@ class MotionSolver():
 
             ## unpack data
             [scene_id, scene_T, point_coords, point_feats, offset, utterance, lang_desc, lang_mask, 
-            trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask] = data
+            trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask, action_category] = data
 
             ## forward
-            [predict_target_object_center, rec_trans, rec_orient, rec_pose_body, mu, logvar] = self._forward(
+            [predict_target_object_center, action_logits, rec_trans, rec_orient, rec_pose_body, mu, logvar] = self._forward(
                 point_coords, point_feats, offset, lang_desc, lang_mask, betas, motion_mask, trans, orient, pose_body
             )
-            [ground_loss, rec_trans_loss, rec_orient_loss, rec_body_pose_loss, rec_body_mesh_loss, kl_loss] = self._cal_loss(
-                (target_object_center, trans, orient, pose_body, betas, pose_hand),
-                (predict_target_object_center, rec_trans, rec_orient, rec_pose_body, betas, pose_hand),
+            [ground_loss, classify_loss, rec_trans_loss, rec_orient_loss, rec_body_pose_loss, rec_body_mesh_loss, kl_loss] = self._cal_loss(
+                (target_object_center, action_category, trans, orient, pose_body, betas, pose_hand),
+                (predict_target_object_center, action_logits, rec_trans, rec_orient, rec_pose_body, betas, pose_hand),
                 mu, logvar, motion_mask
             )
 
@@ -423,7 +429,8 @@ class MotionSolver():
                         self.config.weight_loss_rec * rec_orient_loss + \
                         self.config.weight_loss_rec_pose * rec_body_pose_loss + \
                         self.config.weight_loss_rec_vertex * rec_body_mesh_loss
-            loss = self.config.weight_loss_ground * ground_loss + \
+            loss = self.config.weight_loss_classify * classify_loss + \
+                    self.config.weight_loss_ground * ground_loss + \
                     self.config.weight_loss_kl * kl_loss + \
                     rec_loss
 
@@ -432,6 +439,7 @@ class MotionSolver():
             self.log[phase][epoch_id]['iter_time'].append(iter_time)
             self.log[phase][epoch_id]['loss'].append(loss.item())
             self.log[phase][epoch_id]['ground_loss'].append(ground_loss.item())
+            self.log[phase][epoch_id]['classify_loss'].append(classify_loss.item())
             self.log[phase][epoch_id]['rec_loss'].append(rec_loss.item())
             self.log[phase][epoch_id]['rec_trans_loss'].append(rec_trans_loss.item())
             self.log[phase][epoch_id]['rec_orient_loss'].append(rec_orient_loss.item())
@@ -561,10 +569,10 @@ class MotionSolver():
         print('-' * 20, 'check data', '-' * 20)
         for data in self.dataloader['train']:
             [scene_id, scene_T, point_coords, point_feats, offset, utterance, lang_desc, lang_mask, 
-            trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask] = data
+            trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask, action_category] = data
 
             for index in range(len(trans)):
-                print('check', index, scene_id[index], utterance[index], lang_desc[index], lang_mask[index])
+                print('check', index, scene_id[index], utterance[index], lang_desc[index], lang_mask[index], action_category)
                 ## visualize training data
                 S = trimesh.Scene()
                 
@@ -625,9 +633,9 @@ class MotionSolver():
         with torch.no_grad():
             for i, data in enumerate(self.dataloader['test']):
                 [scene_id, scene_T, point_coords, point_feats, offset, utterance, lang_desc, lang_mask, 
-                trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask] = data
+                trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask, action_category] = data
 
-                [predict_target_object, rec_trans, rec_orient, rec_pose_body, mu, logvar] = self._forward(
+                [predict_target_object_center, action_logits, rec_trans, rec_orient, rec_pose_body, mu, logvar] = self._forward(
                     point_coords, point_feats, offset, lang_desc, lang_mask, betas, motion_mask, trans, orient, pose_body
                 )
 
@@ -652,202 +660,6 @@ class MotionSolver():
                 if i > 100:
                     break
 
-    def save_k_sample(self, dataset='val', k: int=10):
-        self._set_phase('val')
-        self.config.resume_model = os.path.join(self.config.log_dir, 'model_best.pth')
-        self._load_state_dict()
-
-        with torch.no_grad():
-            for i, data in enumerate(self.dataloader['test']):
-                [scene_id, scene_T, point_coords, point_feats, offset, utterance, lang_desc, lang_mask, 
-                trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask] = data
-
-                nframe = torch.sum(~motion_mask)
-                [pred_target_object, rec_trans, rec_orient, rec_pose_body, rec_mask, atten_score, scene_xyz] = self._sample(
-                    point_coords, point_feats, offset, lang_desc, lang_mask, betas, k, 'fixed', nframe, trans, orient, pose_body
-                )
-
-                ## save gt
-                trans = trans[0][~motion_mask[0]]
-                orient = orient[0][~motion_mask[0]]
-                pose_body = pose_body[0][~motion_mask[0]]
-                pose_hand = pose_hand[0][~motion_mask[0]]
-
-                self._visualize(
-                    os.path.join(self.config.log_dir, '{}_visual_sample_save/{}/gt'.format(dataset, str(i))),
-                    scene_id[0],
-                    scene_T[0],
-                    utterance[0],
-                    (trans, orient, betas, pose_body, pose_hand),
-                    None
-                )
-                p = os.path.join(self.config.log_dir, '{}_visual_sample_save/{}/gt/param.pkl'.format(dataset, str(i)))
-                with open(p, 'wb') as fp:
-                    pickle.dump(
-                        (scene_id[0], scene_T[0], utterance[0], (trans, orient, betas, pose_body, pose_hand)
-                    ), fp)
-
-                ## save k sample
-                rec_trans = rec_trans[0, :, ~motion_mask[0], :]
-                rec_orient = rec_orient[0, :, ~motion_mask[0], :]
-                rec_pose_body = rec_pose_body[0, :, ~motion_mask[0], :]
-                rec_pose_hand = torch.zeros(k, *pose_hand.shape)
-                for j in range(k):
-                    self._visualize(
-                        os.path.join(self.config.log_dir, '{}_visual_sample_save/{}/sample_{}'.format(dataset, str(i), str(j))),
-                        scene_id[0],
-                        scene_T[0],
-                        utterance[0],
-                        (rec_trans[j], rec_orient[j], betas, rec_pose_body[j], rec_pose_hand[j]),
-                        None
-                    )
-                    p = os.path.join(self.config.log_dir, '{}_visual_sample_save/{}/sample_{}/param.pkl'.format(dataset, str(i), str(j)))
-                    with open(p, 'wb') as fp:
-                        pickle.dump(
-                            (scene_id[0], scene_T[0], utterance[0], (rec_trans[j], rec_orient[j], betas, rec_pose_body[j], rec_pose_hand[j])
-                        ), fp)
-
-                ## visualize attention
-                lang_token_atten = atten_score[0, 128:].detach().cpu().numpy()
-
-                self._visualize_atten(
-                    os.path.join(self.config.log_dir, '{}_visual_sample_save/{}'.format(dataset, str(i))),
-                    scene_id[0], 
-                    scene_T[0], 
-                    scene_xyz[0].detach().cpu().numpy(), 
-                    lang_token_atten[0, 0:128],
-                    None,
-                )
-                
-                if i >= 20:
-                    break
-
-    def save_k_sample_given_T(self, dataset='val', k: int=10, T: int=30):
-        self._set_phase('val')
-        self.config.resume_model = os.path.join(self.config.log_dir, 'model_best.pth')
-        self._load_state_dict()
-
-        with torch.no_grad():
-            for i, data in enumerate(self.dataloader['test']):
-                [scene_id, scene_T, point_coords, point_feats, offset, utterance, lang_desc, lang_mask, 
-                trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask] = data
-
-                [pred_target_object, rec_trans, rec_orient, rec_pose_body, rec_mask, atten_score, scene_xyz] = self._sample(
-                    point_coords, point_feats, offset, lang_desc, lang_mask, betas, k, 'fixed', T, trans, orient, pose_body
-                )
-
-                ## save gt
-                trans = trans[0][~motion_mask[0]]
-                orient = orient[0][~motion_mask[0]]
-                pose_body = pose_body[0][~motion_mask[0]]
-                pose_hand = pose_hand[0][~motion_mask[0]]
-
-                self._visualize(
-                    os.path.join(self.config.log_dir, '{}_visual_sample_save_rand_{}/{}/gt'.format(dataset, T, str(i))),
-                    scene_id[0],
-                    scene_T[0],
-                    utterance[0],
-                    (trans, orient, betas, pose_body, pose_hand),
-                    None
-                )
-                p = os.path.join(self.config.log_dir, '{}_visual_sample_save_rand_{}/{}/gt/param.pkl'.format(dataset, T, str(i)))
-                with open(p, 'wb') as fp:
-                    pickle.dump(
-                        (scene_id[0], scene_T[0], utterance[0], (trans, orient, betas, pose_body, pose_hand)
-                    ), fp)
-
-                ## save k sample
-                rec_trans = rec_trans[0, :, 0:T, :]
-                rec_orient = rec_orient[0, :, 0:T, :]
-                rec_pose_body = rec_pose_body[0, :, 0:T, :]
-                rec_pose_hand = torch.zeros(k, T, pose_hand.shape[-1])
-                for j in range(k):
-                    self._visualize(
-                        os.path.join(self.config.log_dir, '{}_visual_sample_save_rand_{}/{}/smaple_{}'.format(dataset, T, str(i), str(j))),
-                        scene_id[0],
-                        scene_T[0],
-                        utterance[0],
-                        (rec_trans[j], rec_orient[j], betas, rec_pose_body[j], rec_pose_hand[j]),
-                        None
-                    )
-                    p = os.path.join(self.config.log_dir, '{}_visual_sample_save_rand_{}/{}/smaple_{}/param.pkl'.format(dataset, T, str(i), str(j)))
-                    with open(p, 'wb') as fp:
-                        pickle.dump(
-                            (scene_id[0], scene_T[0], utterance[0], (rec_trans[j], rec_orient[j], betas, rec_pose_body[j], rec_pose_hand[j])
-                        ), fp)
-
-                ## visualize attention
-                lang_token_atten = atten_score[0, 128:].detach().cpu().numpy()
-
-                self._visualize_atten(
-                    os.path.join(self.config.log_dir, '{}_visual_sample_save_rand_{}/{}'.format(dataset, T, str(i))),
-                    scene_id[0], 
-                    scene_T[0], 
-                    scene_xyz[0].detach().cpu().numpy(), 
-                    lang_token_atten[0, 0:128],
-                    None,
-                )
-                
-                if i >= 20:
-                    break
-
-    def save_rec(self, dataset='val'):
-        self._set_phase('val')
-        self.config.resume_model = os.path.join(self.config.log_dir, 'model_best.pth')
-        self._load_state_dict()
-
-        with torch.no_grad():
-            for i, data in enumerate(self.dataloader['test']):
-                [scene_id, scene_T, point_coords, point_feats, offset, utterance, lang_desc, lang_mask, 
-                trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask] = data
-
-                [predict_target_object, rec_trans, rec_orient, rec_pose_body, mu, logvar] = self._forward(
-                    point_coords, point_feats, offset, lang_desc, lang_mask, betas, motion_mask, trans, orient, pose_body
-                )
-
-                ## save gt
-                trans = trans[0][~motion_mask[0]]
-                orient = orient[0][~motion_mask[0]]
-                pose_body = pose_body[0][~motion_mask[0]]
-                pose_hand = pose_hand[0][~motion_mask[0]]
-
-                self._visualize(
-                    os.path.join(self.config.log_dir, '{}_visual_rec_save/{}_gt'.format(dataset, str(i))),
-                    scene_id[0],
-                    scene_T[0],
-                    utterance[0],
-                    (trans, orient, betas, pose_body, pose_hand),
-                    None
-                )
-                p = os.path.join(self.config.log_dir, '{}_visual_rec_save/{}_gt/param.pkl'.format(dataset, str(i)))
-                with open(p, 'wb') as fp:
-                    pickle.dump(
-                        (scene_id[0], scene_T[0], utterance[0], (trans, orient, betas, pose_body, pose_hand)
-                    ), fp)
-
-                ## save rec sample
-                rec_trans = rec_trans[0, ~motion_mask[0], :]
-                rec_orient = rec_orient[0, ~motion_mask[0], :]
-                rec_pose_body = rec_pose_body[0, ~motion_mask[0], :]
-                rec_pose_hand = torch.zeros(*pose_hand.shape)
-
-                self._visualize(
-                    os.path.join(self.config.log_dir, '{}_visual_rec_save/{}_rec'.format(dataset, str(i))),
-                    scene_id[0],
-                    scene_T[0],
-                    utterance[0],
-                    (rec_trans, rec_orient, betas, rec_pose_body, rec_pose_hand),
-                    None
-                )
-                p = os.path.join(self.config.log_dir, '{}_visual_rec_save/{}_rec/param.pkl'.format(dataset, str(i)))
-                with open(p, 'wb') as fp:
-                    pickle.dump(
-                        (scene_id[0], scene_T[0], utterance[0], (rec_trans, rec_orient, betas, rec_pose_body, rec_pose_hand)
-                    ), fp)
-                
-                if i >= 20:
-                    break
-
     def test_sample(self, dataset='val', k: int=1, sample_type: str='fixed'):
         self._set_phase('val')
         self.config.resume_model = os.path.join(self.config.log_dir, 'model_best.pth')
@@ -856,10 +668,10 @@ class MotionSolver():
         with torch.no_grad():
             for i, data in enumerate(self.dataloader['test']):
                 [scene_id, scene_T, point_coords, point_feats, offset, utterance, lang_desc, lang_mask, 
-                trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask] = data
+                trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask, action_category] = data
 
                 nframe = torch.sum(~motion_mask)
-                [pred_target_object, rec_trans, rec_orient, rec_pose_body, rec_mask, atten_score, scene_xyz] = self._sample(
+                [pred_target_object, action_logits, rec_trans, rec_orient, rec_pose_body, rec_mask, atten_score, scene_xyz] = self._sample(
                     point_coords, point_feats, offset, lang_desc, lang_mask, betas, k, sample_type, nframe, trans, orient, pose_body
                 )
 
@@ -904,7 +716,7 @@ class MotionSolver():
 
                 ## visualize attention
                 lang_token_atten = atten_score[0, 128:].detach().cpu().numpy()
-                
+
                 self._visualize_atten(
                     os.path.join(self.config.log_dir, '{}_visual_sample_{}_{}'.format(dataset, k, sample_type), str(i)),
                     scene_id[0], 
@@ -914,6 +726,71 @@ class MotionSolver():
                     pred_target_object[0].detach().cpu().numpy(),
                 )
                 if i >= 100:
+                    break
+
+    def save_k_sample(self, dataset='val', k: int=10):
+        self._set_phase('val')
+        self.config.resume_model = os.path.join(self.config.log_dir, 'model_best.pth')
+        self._load_state_dict()
+
+        with torch.no_grad():
+            for i, data in enumerate(self.dataloader['test']):
+                [scene_id, scene_T, point_coords, point_feats, offset, utterance, lang_desc, lang_mask, 
+                trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask, action_category] = data
+
+                nframe = torch.sum(~motion_mask)
+                [pred_target_object, action_logits, rec_trans, rec_orient, rec_pose_body, rec_mask, atten_score, scene_xyz] = self._sample(
+                    point_coords, point_feats, offset, lang_desc, lang_mask, betas, k, 'fixed', nframe, trans, orient, pose_body
+                )
+
+                ## save gt
+                trans = trans[0][~motion_mask[0]]
+                orient = orient[0][~motion_mask[0]]
+                pose_body = pose_body[0][~motion_mask[0]]
+                pose_hand = pose_hand[0][~motion_mask[0]]
+
+                self._visualize(
+                    os.path.join(self.config.log_dir, '{}_visual_sample_save/{}/gt'.format(dataset, str(i))),
+                    scene_id[0],
+                    scene_T[0],
+                    utterance[0],
+                    (trans, orient, betas, pose_body, pose_hand),
+                    None
+                )
+
+                ## save k sample
+                rec_trans = rec_trans[0, :, ~motion_mask[0], :]
+                rec_orient = rec_orient[0, :, ~motion_mask[0], :]
+                rec_pose_body = rec_pose_body[0, :, ~motion_mask[0], :]
+                rec_pose_hand = torch.zeros(k, *pose_hand.shape)
+                for j in range(k):
+                    self._visualize(
+                        os.path.join(self.config.log_dir, '{}_visual_sample_save/{}/sample_{}'.format(dataset, str(i), str(j))),
+                        scene_id[0],
+                        scene_T[0],
+                        utterance[0],
+                        (rec_trans[j], rec_orient[j], betas, rec_pose_body[j], rec_pose_hand[j]),
+                        None
+                    )
+                    p = os.path.join(self.config.log_dir, '{}_visual_sample_save/{}/sample_{}/param.pkl'.format(dataset, str(i), str(j)))
+                    with open(p, 'wb') as fp:
+                        pickle.dump(
+                            (scene_id[0], scene_T[0], utterance[0], (rec_trans[j], rec_orient[j], betas, rec_pose_body[j], rec_pose_hand[j])
+                        ), fp)
+
+                ## visualize attention
+                lang_token_atten = atten_score[0, 128:].detach().cpu().numpy()
+
+                self._visualize_atten(
+                    os.path.join(self.config.log_dir, '{}_visual_sample_save/{}'.format(dataset, str(i))),
+                    scene_id[0], 
+                    scene_T[0], 
+                    scene_xyz[0].detach().cpu().numpy(), 
+                    lang_token_atten[0, 0:128],
+                    None,
+                )
+                
+                if i >= 20:
                     break
 
     def _convert_compute_smplx_to_render_smplx(self, smplx_tensor_tuple):
@@ -1078,10 +955,10 @@ class MotionSolver():
             for i, data in enumerate(self.dataloader['test']):
                 ## unpack data
                 [scene_id, scene_T, point_coords, point_feats, offset, utterance, lang_desc, lang_mask, 
-                trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask] = data
+                trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask, action_category] = data
 
                 ## forward
-                [predict_target_object_center, rec_trans, rec_orient, rec_pose_body, mu, logvar] = self._forward(
+                [predict_target_object_center, action_logits, rec_trans, rec_orient, rec_pose_body, mu, logvar] = self._forward(
                     point_coords, point_feats, offset, lang_desc, lang_mask, betas, motion_mask, trans, orient, pose_body
                 )
 
@@ -1139,7 +1016,6 @@ class MotionSolver():
         self._set_phase('val')
         self.config.resume_model = os.path.join(self.config.log_dir, 'model_best.pth')
         self._load_state_dict()
-        anchor_index = 0 if self.config.action == 'stand up' else -1
 
         with torch.no_grad():
             dist_to_obj = []
@@ -1149,10 +1025,11 @@ class MotionSolver():
 
             for i, data in enumerate(self.dataloader['test']):
                 [scene_id, scene_T, point_coords, point_feats, offset, utterance, lang_desc, lang_mask, 
-                trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask] = data
+                trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask, action_category] = data
+                anchor_index = 0 if action_category[0] == 2 else -1
 
                 nframe = torch.sum(~motion_mask)
-                [pred_target_object, rec_trans, rec_orient, rec_pose_body, rec_mask, atten_score, scene_xyz] = self._sample(
+                [pred_target_object, action_logits, rec_trans, rec_orient, rec_pose_body, rec_mask, atten_score, scene_xyz] = self._sample(
                     point_coords, point_feats, offset, lang_desc, lang_mask, betas, k, sample_type, nframe, trans, orient, pose_body
                 )
 

@@ -30,6 +30,7 @@ class CondNet(nn.Module):
             Console.log('Load pre-trained scene model weigth \'{}\'..'.format(self.config.pretrained_scene_model))
         
         self.target_regressor = nn.Linear(self.config.condition_latent_size, 3)
+        self.target_classifier = nn.Linear(self.config.condition_latent_size, 4)
         
         ## text model, bert
         self.bert_model = BertModel.from_pretrained('bert-base-uncased')
@@ -104,12 +105,13 @@ class CondNet(nn.Module):
 
         ## for auxiliary task
         regress_center = self.target_regressor(fusion_feat)
+        classify_logits = self.target_classifier(fusion_feat)
 
         ## output
         if need_atten_score:
-            return fusion_feat, regress_center, atten_score, p5.view(B, -1, 3)
+            return fusion_feat, regress_center, classify_logits, atten_score, p5.view(B, -1, 3)
         
-        return fusion_feat, regress_center
+        return fusion_feat, regress_center, classify_logits
 
 class MotionEncoder(nn.Module):
     def __init__(self, input_size: int, hidden_size: int, condition_latent_size: int, z_size: int=32):

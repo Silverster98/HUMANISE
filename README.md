@@ -110,7 +110,7 @@ Following [link](https://github.com/daveredrum/Pointnet2.ScanNet#preprocess-scan
     # e.g., bash scripts/eval_metric.sh 20220829_194320 "walk"
     ```
 
-  - Generation metrics (goal dist.). Set `eval_rec=False` (Line 64) in eval_metric_motion.py to compute generation metrics. Then run the following script. It will take several hours to compute the results.
+  - Generation metrics (goal dist.). Set `eval_rec=False` (Line 64) in `eval_metric_motion.py` to compute generation metrics. Then run the following script. It will take several hours to compute the results.
     
     ```bash
     bash scripts/eval_metric.sh ${STAMP} "${ACTION}"
@@ -142,9 +142,47 @@ Following [link](https://github.com/daveredrum/Pointnet2.ScanNet#preprocess-scan
 
 ### Action-Agnostic Model
 
-coming soon!
+- First, change to `agnostic` branch by executing `git checkout agnostic`.
 
----
+- Train
+
+  ```bash
+  bash scripts/train.sh
+  ```
+
+- Eval (Quantitative)
+
+  - Reconstruction metrics.
+
+    ```bash
+    bash scripts/eval_metric.sh ${STAMP}
+    # e.g., bash scripts/eval_metric.sh 20220831_153356
+    ```
+
+  - Generation metrics (goal dist.). Set `eval_rec=False` (Line 64) in `eval_metric_motion.py` to compute generation metrics. Then run the following script. It will take several hours to compute the results.
+    
+    ```bash
+    bash scripts/eval_metric.sh ${STAMP}
+    # e.g., bash scripts/eval_metric.sh 20220831_153356
+    ```
+
+  - Generation metrics (APD).
+
+    ```bash
+    bash scripts/eval_pairwise_distance.sh ${STAMP}
+    # e.g., bash scripts/eval_pairwise_distance.sh 20220831_153356
+    ```
+
+- Eval (Qualitative)
+
+  - Qualitative results of generation.
+
+    ```bash
+    bash scripts/eval.sh ${STAMP}
+    # e.g., bash scripts/eval.sh 20220831_153356
+    ```
+
+### Pretrained Models
 
 You can use our pretrained [models](https://docs.google.com/forms/d/e/1FAIpQLSfzhj2wrRLqAXFVOTn8K5NDN-J_5HueRTohMAlayqBuPPWA1w/viewform?usp=sf_link). (In the `checkpoints` folder)
 
@@ -155,8 +193,10 @@ You can use our pretrained [models](https://docs.google.com/forms/d/e/1FAIpQLSfz
 |20220830_203617|action-specific model (sit)|
 |20220830_203832|action-specific model (stand up)|
 |20220830_204043|action-specific model (lie)|
+|20220831_153356|action-agnostic model|
 
 Put the downloaded checkpoints into `outputs/` folder as following:
+
 ```bash
 -| model/
 -| outputs/

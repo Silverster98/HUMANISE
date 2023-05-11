@@ -48,10 +48,10 @@ def test(args, dataset='val'):
         pdist = []
         for i, data in enumerate(solver.dataloader['test']):
             [scene_id, scene_T, point_coords, point_feats, offset, utterance, lang_desc, lang_mask, 
-            trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask] = data
+            trans, orient, betas, pose_body, pose_hand, motion_mask, target_object_center, target_object_mask, action_category] = data
 
             nframe = torch.sum(~motion_mask)
-            [pred_target_object, rec_trans, rec_orient, rec_pose_body, rec_mask, atten_score, scene_xyz] = solver._sample(
+            [pred_target_object, action_logits, rec_trans, rec_orient, rec_pose_body, rec_mask, atten_score, scene_xyz] = solver._sample(
                 point_coords, point_feats, offset, lang_desc, lang_mask, betas, k, 'fixed', nframe, trans, orient, pose_body
             )
 
