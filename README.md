@@ -227,3 +227,12 @@ If you find our project useful, please consider citing us:
 
 Some codes are borrowed from [PSI-release](https://github.com/yz-cnsdqz/PSI-release), [point-transformer](https://github.com/POSTECH-CVLab/point-transformer), [Pointnet2.ScanNet](https://github.com/daveredrum/Pointnet2.ScanNet), and [YouRefIt_ERU](https://github.com/yixchen/YouRefIt_ERU).
 
+### License
+
+Our code and data are released under the [MIT license](./LICENSE). The following datasets are used in our project and are subject to their respective licenses:
+
+- AMASS is under the [Dataset Copyright License for non-commercial scientific research purposes](https://amass.is.tue.mpg.de/license.html).
+- BABEL is under the [Software Copyright License for non-commercial scientific research purposes](https://babel.is.tue.mpg.de/license.htmll).
+- ScanNet V2 is under the [ScanNet Terms of Use](http://kaldir.vc.in.tum.de/scannet/ScanNet_TOS.pdf).
+- Scan2Cad is under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License](https://github.com/skanti/Scan2CAD/blob/master/LICENSE.txt).
+- ReferIt3D is under the [MIT license](https://github.com/referit3d/referit3d/blob/eccv/LICENSE).
