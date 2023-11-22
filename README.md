@@ -34,6 +34,8 @@ In this work, we propose a large-scale and semantic-rich human-scene interaction
 </div>
 
 **Update**
+
+- 2023/11/22: **We plan to refactor this repository to optimize the framework and code in recent weeks.**
 - 2023/6/5: We re-format the data for using HUMANISE easier. Please check [HUMANISE New Format](./dataset/dataset.md) for more details.
 
 ## Abstract
